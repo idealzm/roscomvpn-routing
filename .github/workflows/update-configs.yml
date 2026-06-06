@@ -146,25 +146,15 @@ jobs:
             printf 'incy://routing/onadd/%s\n' "$b64" > "INCY/${variant}.DEEPLINK"
           done
 
-      - name: Ensure Name and DNS are correct
+      - name: Ensure Name is el-duckVPN
         shell: bash
         run: |
           set -euo pipefail
-          ADGUARD_IP="217.60.10.154"
           for f in HAPP/DEFAULT.JSON HAPP/WHITELIST.JSON HAPP/JSONSUB.JSON INCY/DEFAULT.JSON INCY/WHITELIST.JSON INCY/JSONSUB.JSON; do
             current_name="$(jq -r '.Name' "$f")"
             if [[ "$current_name" != "el-duckVPN" ]]; then
               tmp="$(mktemp)"
               jq '.Name = "el-duckVPN"' "$f" > "$tmp"
-              mv "$tmp" "$f"
-            fi
-            dns_ip="$(jq -r '.RemoteDns' "$f")"
-            if [[ "$dns_ip" != "$ADGUARD_IP" ]]; then
-              tmp="$(mktemp)"
-              jq \
-                --arg ip "$ADGUARD_IP" \
-                '.RemoteDns = $ip | .RemoteDNSType = "Do53" | .RemoteDNSDomain = "" | .RemoteDNSIP = $ip | .DomesticDns = $ip | .DomesticDNSType = "Do53" | .DomesticDNSDomain = "" | .DomesticDNSIP = $ip' \
-                "$f" > "$tmp"
               mv "$tmp" "$f"
             fi
           done
